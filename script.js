@@ -1,4 +1,3 @@
-var json = {};
 window.onload = function() {
     var map = L.map('map').setView([52.5204, 13.3947], 12);
     
@@ -7,23 +6,12 @@ window.onload = function() {
 			var west = map.getBounds().getWest();
 			var north = map.getBounds().getNorth()
 			var south = map.getBounds().getSouth();
-
-			console.log(
-				'east:' + east + '	west:' + west + 'north:' + north + '	south:' + south
-			)
 			
 			$.get('http://home.arsbrevis.de:31312/geoserver/dbpro/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dbpro%3Aforest_fixed&maxFeatures=1000000&bbox=' + west + ',' + east + ',' + south + ',' + north + '&outputFormat=application%2Fjson',
 				function(data) {
-                    console.log("ja 1")
-                    console.log(json)
-                    
-
-					console.log("test2")
 					L.geoJSON(data, {
 						style: myStyle
                     }).addTo(map);
-                    console.log("ja 2")
-                    console.log(json);
 				}, 'json');
         }
         
