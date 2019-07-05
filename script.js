@@ -40,14 +40,34 @@ window.onload = function() {
         legend.addTo(map);
 	}
 
-	function updateCNN() {
-		change = true;
+	function layerControl(){
+		var control = document.getElementById("3");
+		console.log(control.value)
+		if(control.value == "Delete Labels"){
+			removeLayer();
+			control.value = "Add Labels"
+		}else{
+			if(change) updateCNN();
+			else updateKNN();
+			control.value = "Delete Labels"
+		}
+
+		
+	}
+
+	function removeLayer(){
 		map.eachLayer(function(layer) {
 			if( !(layer instanceof L.TileLayer )){
 				console.log("remove:  " + layer)
 				map.removeLayer(layer);
 			}				
 		});
+	}
+
+	function updateCNN() {
+		removeLayer();
+		change = true;
+		
 	
 		var east = map.getBounds().getEast()
 		var west = map.getBounds().getWest();
@@ -92,24 +112,19 @@ window.onload = function() {
 	}
 
 	function changetoCNN(){
-		map.flyTo([52.5204, 13.3947], 6)
+		//map.flyTo([52.5204, 13.3947], 6)
 		changeLegend();
 		updateCNN();
 	}
 
 	function changetoKNN(){
-		map.flyTo([52.5204, 13.3947], 6)
+		//map.flyTo([52.5204, 13.3947], 6)
 		changeLegend();
 		updateKNN();	
 	}
 	
 	function updateKNN() {
-		map.eachLayer(function(layer) {
-			if( !(layer instanceof L.TileLayer )){
-				console.log("remove:  " + layer)
-				map.removeLayer(layer);
-			}				
-		});
+		removeLayer();
 		change = false;
 		
 		var east = map.getBounds().getEast()
