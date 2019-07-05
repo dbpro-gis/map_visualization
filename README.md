@@ -14,4 +14,4 @@ The legend at bottom left displays the correspondent class for every layer-color
 
 To view the map visualization just open the html file.
 
-To change between CNN and KNN data just press the correspondent button top right
+To change between CNN and KNN data just press the correspondent button top right (default is CNN view)
