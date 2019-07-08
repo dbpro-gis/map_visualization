@@ -6,7 +6,10 @@ var geojsonLayer2;
 var legend;
 window.onload = function() {
  		map = L.map('map').setView([52.5204, 13.3947], 6);
-    	
+		
+		 /*
+		 EventListener für Bewegungen/Zoom in der Karte
+		 */
 		map.on('moveend', function() {
 			if(change){
 				//removelayer
@@ -28,21 +31,27 @@ window.onload = function() {
 
 
 
-    
+		/*
+		Einfügen der ungelabelten Map
+		*/
 		tileLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href=”http://osm.org/copyright”>OpenStreetMap</a> contributors'
 		})
 		tileLayer.addTo(map);
     
-		
+		/*
+		Legende
+		*/
 		legend = L.control({ position: 'bottomleft' });
 		legend.onAdd = adder;
         legend.addTo(map);
 	}
 
+	/*
+	Labels hinzufügen bzw entfernen
+	*/
 	function layerControl(){
 		var control = document.getElementById("3");
-		console.log(control.value)
 		if(control.value == "Delete Labels"){
 			removeLayer();
 			control.value = "Add Labels"
@@ -50,20 +59,21 @@ window.onload = function() {
 			if(change) updateCNN();
 			else updateKNN();
 			control.value = "Delete Labels"
-		}
-
-		
+		}		
 	}
 
+	/*
+	Labels entfernen
+	*/
 	function removeLayer(){
 		map.eachLayer(function(layer) {
-			if( !(layer instanceof L.TileLayer )){
-				console.log("remove:  " + layer)
-				map.removeLayer(layer);
-			}				
+			if( !(layer instanceof L.TileLayer )) map.removeLayer(layer);					
 		});
 	}
 
+	/*
+	CNN-Labels in neuem Bereich laden
+	*/
 	function updateCNN() {
 		removeLayer();
 		change = true;
@@ -73,14 +83,12 @@ window.onload = function() {
 		var west = map.getBounds().getWest();
 		var north = map.getBounds().getNorth()
 		var south = map.getBounds().getSouth();
-		console.log("update cnn")
-		if(map.getZoom()<=9){
-			console.log("zoom <10")
-			
-							
+	/*
+	Overview für niedriges Zoom-Level in Karte laden
+	*/
+		if(map.getZoom()<=9){			
 				$.get('http://home.arsbrevis.de:31312/geoserver/dbpro/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dbpro%3Aprediction_overview&maxFeatures=1000000&bbox' + west + ',' + east + ',' + south + ',' + north + '&outputFormat=application%2Fjson',
-				function(data) {		
-					
+				function(data) {							
 				geojsonLayer = L.geoJSON(data.features[0], {
 					style: {color: "black"}
 				})																								
@@ -89,7 +97,9 @@ window.onload = function() {
 		
 		}					
 		else{
-			console.log("zoom >=10")
+		/*
+		Detailliertere Labels für entsprechenden Bereich
+		*/
 		$.get('http://home.arsbrevis.de:31312/geoserver/dbpro/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dbpro%3Acnn_final_2019&maxFeatures=1000000&bbox=' + west + ',' + east + ',' + south + ',' + north + '&outputFormat=application%2Fjson',
 			function(data) {								
 				geojsonLayer2 = L.geoJSON(data, {
@@ -101,6 +111,9 @@ window.onload = function() {
 		}
 	}
 
+	/*
+	Legende für ausgewählten Modus (CNN / KNN) wechseln
+	*/
 	function changeLegend(){
 			map.removeControl(legend);
 			legend = L.control({ position: 'bottomleft' });
@@ -111,18 +124,25 @@ window.onload = function() {
 			legend.addTo(map);
 	}
 
+	/*
+	Wechseln des Modus zu CNN
+	*/
 	function changetoCNN(){
-		//map.flyTo([52.5204, 13.3947], 6)
 		changeLegend();
 		updateCNN();
 	}
 
+	/*
+	Wechseln des Modus zu KNN
+	*/
 	function changetoKNN(){
-		//map.flyTo([52.5204, 13.3947], 6)
 		changeLegend();
 		updateKNN();	
 	}
 	
+	/*
+	KNN-Labels in neuem Bereich laden
+	*/
 	function updateKNN() {
 		removeLayer();
 		change = false;
@@ -131,11 +151,11 @@ window.onload = function() {
 		var west = map.getBounds().getWest();
 		var north = map.getBounds().getNorth()
 		var south = map.getBounds().getSouth();
-		console.log("update knn")
+		
+		/*
+		Overview für niedriges Zoom-Level in Karte laden
+		*/
 		if(map.getZoom()<10){
-			console.log("zoom <10")
-			
-							
 				$.get('http://home.arsbrevis.de:31312/geoserver/dbpro/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dbpro%3Aprediction_overview&maxFeatures=1000000&bbox=' + west + ',' + east + ',' + south + ',' + north + '&outputFormat=application%2Fjson',
 				function(data) {		
 				geojsonLayer = L.geoJSON(data.features[1], {
@@ -144,12 +164,13 @@ window.onload = function() {
 				geojsonLayer.addTo(map);
 			}, 'json');
 		
-		}					
+		}	
+		/*
+		Detailliertere Labels für entsprechenden Bereich
+		*/				
 		else{
-			console.log("zoom >=10")
 		$.get('http://home.arsbrevis.de:31312/geoserver/dbpro/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dbpro%3Aprediction_knn_test&maxFeatures=1000000&bbox=' + west + ',' + east + ',' + south + ',' + north + '&outputFormat=application%2Fjson',
-			function(data) {
-				console.log(data)								
+			function(data) {							
 				geojsonLayer2 = L.geoJSON(data, {
 					style: myStyle2
 				})
@@ -159,11 +180,12 @@ window.onload = function() {
 		}
 	}
 	
+	/*
+	Style für KNN-Legende
+	*/
 	var myStyle2 = function(feature){
-		console.log("styleeeeeeeeeeeee")
 		switch (feature.properties.prediction) {
-			case "1": console.log("1");
-			return { color: "yellow", weight: "0", weight : "none"};
+			case "1": return { color: "yellow", weight: "0", weight : "none"};
 			               
             case "2": return { color: "red", weight: "0"};			
                 
@@ -178,6 +200,9 @@ window.onload = function() {
         }
 	}
 
+	/*
+	Style für CNN-Legende
+	*/
     var myStyle = function(feature) {
 		
         switch (feature.properties.prediction) {
@@ -206,6 +231,9 @@ window.onload = function() {
         }
 	}
 
+	/*
+	Hinzufügen von CNN-Legende
+	*/
     var adder = function() {
 			var div = L.DomUtil.create('div', 'legend');
 
@@ -284,6 +312,9 @@ window.onload = function() {
 			return div;
 		}
 
+		/*
+		Hinzufügen von KNN-Legende
+		*/
 		var adder2 = function() {
 			var div = L.DomUtil.create('div', 'legend');
 
